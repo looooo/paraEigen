@@ -56,12 +56,7 @@ coverage.xml
 docs/_build/
 
 # PyBuilder
-
 target/
 
 #Ipython Notebook
 .ipynb_checkpoints
-
-#kdevelop
-
-*.kdev
