@@ -25,7 +25,4 @@ EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c
   "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
   OUTPUT_VARIABLE python_libs OUTPUT_STRIP_TRAILING_WHITESPACE )
 
-message(${PYTHON_INCLUDE_DIRS})
-message(${PYTHON_EXECUTABLE})
-message(${python_libs})
 install(TARGETS "eigen" DESTINATION ${python_libs})

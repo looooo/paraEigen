@@ -1,8 +1,7 @@
 import sys
 
 sys.path.insert(0, "build/")
-from eigen import *
-import eigen
+from eigen import vector2, vector3, vector4, vectorx, matrixx, matrix44, sparse_matrix, triplet
 
 import numpy as np
 import unittest
@@ -118,7 +117,7 @@ class MatrixTest(unittest.TestCase):
         self.matrix4 = matrix44(10)
     
     def test_init(self):
-        print(self.matrixx.to_list())
+        self.matrixx.to_list()
 
 
 class SparseTest(unittest.TestCase):
@@ -127,7 +126,6 @@ class SparseTest(unittest.TestCase):
         self.sparse = sparse_matrix(3, 10)
         self.sparse.set_from_triplets([self.triplet])
         mat = matrixx(2, 3, 1.)
-        print((mat * self.sparse).col(1))
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

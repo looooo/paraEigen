@@ -21,6 +21,8 @@ namespace py = pybind11;
 namespace eig = Eigen;
 
 typedef eig::Matrix<double, 4, 4> Matrix44d;
+typedef eig::Matrix<double, 3, 3> Matrix33d;
+typedef eig::Matrix<double, 2, 2> Matrix22d;
 
 template<typename Vector>
 void from_no_args(Vector& instance){
@@ -74,7 +76,7 @@ void vector_from_buffer(Vector& instance, py::buffer b){
     py::buffer_info info = b.request();
     if (info.ndim != 1)
         throw std::runtime_error("Incombatible buffer dimension");
-    if (info.count != instance.size())
+    if (info.size != instance.size())
         throw py::index_error("number of values not matching vector size");
     new (&instance) Vector();
     memcpy(instance.data(), info.ptr, sizeof(double) * instance.size());
@@ -115,6 +117,12 @@ Vector add(Vector &self, Vector &other) {
         throw runtime_error("sizes not matching");
     return self + other;
 }
+
+template<typename Vector>
+Vector radd(Vector &self, int other) {
+    return self;
+}
+
 
 template<typename Vector>
 Vector sub(Vector &self, Vector &other) {
@@ -158,7 +166,7 @@ void vectorx_from_buffer(eig::VectorXd& instance, py::buffer b){
     py::buffer_info info = b.request();
     if (info.ndim != 1)
         throw std::runtime_error("Incombatible buffer dimension");
-    new (&instance) eig::VectorXd(info.count);
+    new (&instance) eig::VectorXd(info.size);
     memcpy(instance.data(), info.ptr, sizeof(double) * instance.size());
 }
 
@@ -204,7 +212,7 @@ void matrix_from_buffer(matrix& self, py::buffer b){
 
 void matrixx_from_buffer(eig::MatrixXd& instance, py::buffer b){
     py::buffer_info info = b.request();
-    if (info.count < 2)
+    if (info.size < 2)
          throw runtime_error("vector size is too small");
     if (info.ndim != 2)
         throw std::runtime_error("Incombatible buffer dimension");
@@ -269,17 +277,20 @@ void matrixx_from_matrixx(eig::MatrixXd &self, eig::MatrixXd &other){
     new (& self) eig::MatrixXd();
 }
 
-double matrixx_getitem(eig::MatrixXd &self, tuple<int, int> t){
+template<typename matrix>
+double matrixx_getitem(matrix &self, tuple<int, int> t){
     return self(get<0>(t), get<1>(t));
 }
 
-eig::VectorXd matrixx_col(eig::MatrixXd &self, int col_index){
+template<typename matrix>
+eig::VectorXd matrixx_col(matrix &self, int col_index){
     if (col_index >= self.size() or col_index < 0)
         throw runtime_error("row not matrix");
     return self.col(col_index);
 }
 
-eig::VectorXd matrixx_row(eig::MatrixXd &self, int row_index){
+template<typename matrix>
+eig::VectorXd matrixx_row(matrix &self, int row_index){
     if (row_index >= self.row(0).size() or row_index < 0)
         throw runtime_error("row not matrix");
     return self.row(row_index);
@@ -317,8 +328,8 @@ vector<vector<double>> matrixx_as_list(eig::MatrixXd &self){
     return out;
 }
 
-PYBIND11_PLUGIN(eigen){
-    py::module m("eigen");
+
+void init_eigen(py::module &m){
     py::class_<eig::Vector2d>(m, "vector2")
         .def(py::init<double, double>())
         .def("__init__", &from_no_args<eig::Vector2d>)
@@ -334,6 +345,7 @@ PYBIND11_PLUGIN(eigen){
         .def("__len__",[](eig::Vector2d &v){return v.size();})
         .def("__abs__",[](eig::Vector2d &v){return v.norm();})
         .def("__add__", &add<eig::Vector2d>)
+        .def("__radd__", &radd<eig::Vector2d>)
         .def("__sub__", &sub<eig::Vector2d>)
         .def("__neg__", &neg<eig::Vector2d>)
         .def("__pos__", &pos<eig::Vector2d>)
@@ -357,9 +369,11 @@ PYBIND11_PLUGIN(eigen){
         .def("__init__", &vector_from_buffer<eig::Vector3d>)
         .def("__repr__", &vector_repr<eig::Vector3d>)
         .def("__getitem__", &vector_getitem<eig::Vector3d>)
+        .def("size", [](eig::Vector3d &v){return v.size();})
         .def("__len__",[](eig::Vector3d &v){return v.size();})
         .def("__abs__",[](eig::Vector3d &v){return v.norm();})
         .def("__add__", &add<eig::Vector3d>)
+        .def("__radd__", &radd<eig::Vector3d>)
         .def("__sub__", &sub<eig::Vector3d>)
         .def("__neg__", &neg<eig::Vector3d>)
         .def("__pos__", &pos<eig::Vector3d>)
@@ -387,6 +401,7 @@ PYBIND11_PLUGIN(eigen){
         .def("__len__",[](eig::Vector4d &v){return v.size();})
         .def("__abs__",[](eig::Vector4d &v){return v.norm();})
         .def("__add__", &add<eig::Vector4d>)
+        .def("__radd__", &add<eig::Vector4d>)
         .def("__sub__", &sub<eig::Vector4d>)
         .def("__neg__", &neg<eig::Vector4d>)
         .def("__pos__", &pos<eig::Vector4d>)
@@ -426,10 +441,33 @@ PYBIND11_PLUGIN(eigen){
         .def("__init__", &matrix_from_python_list<Matrix44d>)
         .def("__init__", &matrix_from_constant<Matrix44d>)
         .def("__init__", &matrix_from_buffer<Matrix44d>)
-//         .def("__getitem__", &matrixx_getitem)
-//         .def("__getitem__", &matrixx_row)
-//         .def("col", &matrixx_col)
-//         .def("row", &matrixx_row)
+        .def("__getitem__", &matrixx_getitem<Matrix44d>)
+        .def("col", &matrixx_col<Matrix44d>)
+        .def("row", &matrixx_row<Matrix44d>)
+//         .def("to_list", &matrixx_as_list)
+//         .def("__mul__", &mat_mul<eig::MatrixXd, eig::MatrixXd>)
+//         .def("__mul__", &mat_mul<eig::MatrixXd, eig::SparseMatrix<double>>)
+        ;
+    
+    py::class_<Matrix33d>(m, "matrix33")
+        .def("__init__", &matrix_from_python_list<Matrix33d>)
+        .def("__init__", &matrix_from_constant<Matrix33d>)
+        .def("__init__", &matrix_from_buffer<Matrix33d>)
+        .def("__getitem__", &matrixx_getitem<Matrix33d>)
+        .def("col", &matrixx_col<Matrix33d>)
+        .def("row", &matrixx_row<Matrix33d>)
+//         .def("to_list", &matrixx_as_list)
+//         .def("__mul__", &mat_mul<eig::MatrixXd, eig::MatrixXd>)
+//         .def("__mul__", &mat_mul<eig::MatrixXd, eig::SparseMatrix<double>>)
+        ;
+        
+    py::class_<Matrix22d>(m, "matrix22")
+        .def("__init__", &matrix_from_python_list<Matrix22d>)
+        .def("__init__", &matrix_from_constant<Matrix22d>)
+        .def("__init__", &matrix_from_buffer<Matrix22d>)
+        .def("__getitem__", &matrixx_getitem<Matrix22d>)
+        .def("col", &matrixx_col<Matrix22d>)
+        .def("row", &matrixx_row<Matrix22d>)
 //         .def("to_list", &matrixx_as_list)
 //         .def("__mul__", &mat_mul<eig::MatrixXd, eig::MatrixXd>)
 //         .def("__mul__", &mat_mul<eig::MatrixXd, eig::SparseMatrix<double>>)
@@ -440,10 +478,10 @@ PYBIND11_PLUGIN(eigen){
         .def("__init__", &matrixx_from_constant)
         .def("__init__", &matrixx_from_python_list)
         .def("__init__", &matrixx_from_buffer)
-        .def("__getitem__", &matrixx_getitem)
-        .def("__getitem__", &matrixx_row)
-        .def("col", &matrixx_col)
-        .def("row", &matrixx_row)
+        .def("__getitem__", &matrixx_getitem<eig::MatrixXd>)
+        .def("__getitem__", &matrixx_row<eig::MatrixXd>)
+        .def("col", &matrixx_col<eig::MatrixXd>)
+        .def("row", &matrixx_row<eig::MatrixXd>)
         .def("to_list", &matrixx_as_list)
         .def("__mul__", &mat_mul<eig::MatrixXd, eig::MatrixXd>)
         .def("__mul__", &mat_mul<eig::MatrixXd, eig::SparseMatrix<double>>);
@@ -458,6 +496,9 @@ PYBIND11_PLUGIN(eigen){
         .def("__mul__", &mat_mul<eig::SparseMatrix<double>, eig::MatrixXd>)
         .def("__mul__", &mat_mul<eig::SparseMatrix<double>, eig::SparseMatrix<double>>)
         .def("to_matrixx",[](eig::SparseMatrix<double> &self){return eig::MatrixXd(self);});
-
-return m.ptr();
+}
+PYBIND11_PLUGIN(eigen){
+    py::module m("eigen");
+    init_eigen(m);
+    return m.ptr();
 };
