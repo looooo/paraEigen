@@ -328,10 +328,13 @@ vector<vector<double>> matrixx_as_list(eig::MatrixXd &self){
     return out;
 }
 
-
 void init_eigen(py::module &m){
     py::class_<eig::Vector2d>(m, "vector2")
         .def(py::init<double, double>())
+        .def_property("x", [](eig::Vector2d &v){return v.x();},
+                           [](eig::Vector2d &v, double x){v.x() = x;})
+        .def_property("y", [](eig::Vector2d &v){return v.y();},
+                           [](eig::Vector2d &v, double y){v.y() = y;})
         .def("__init__", &from_no_args<eig::Vector2d>)
         .def("__init__", &from_constant<eig::Vector2d>)
         .def("__init__", &from_python_list<eig::Vector2d>)
@@ -358,7 +361,13 @@ void init_eigen(py::module &m){
 
 
     py::class_<eig::Vector3d>(m, "vector3")
-        .def(py::init<double, double, double>())
+        .def(py::init<double, double, double>())        
+        .def_property("x", [](eig::Vector3d &v){return v.x();},
+                           [](eig::Vector3d &v, double x){v.x() = x;})
+        .def_property("y", [](eig::Vector3d &v){return v.y();},
+                           [](eig::Vector3d &v, double y){v.y() = y;})
+        .def_property("z", [](eig::Vector3d &v){return v.z();},
+                           [](eig::Vector3d &v, double z){v.z() = z;})
         .def("__init__", &from_no_args<eig::Vector3d>)
         .def("__init__", &from_constant<eig::Vector3d>)
         .def("__init__", &from_python_list<eig::Vector3d>)
@@ -388,6 +397,14 @@ void init_eigen(py::module &m){
         
     py::class_<eig::Vector4d>(m, "vector4")
         .def(py::init<double, double, double, double>())
+        .def_property("x", [](eig::Vector4d &v){return v.x();},
+                           [](eig::Vector4d &v, double x){v.x() = x;})
+        .def_property("y", [](eig::Vector4d &v){return v.y();},
+                           [](eig::Vector4d &v, double y){v.y() = y;})
+        .def_property("z", [](eig::Vector4d &v){return v.z();},
+                           [](eig::Vector4d &v, double z){v.z() = z;})
+//         .def_property("w", [](eig::Vector4d &w){return v.w();},
+//                            [](eig::Vector4d &w, double w){v.() = w;})
         .def("__init__", &from_no_args<eig::Vector4d>)
         .def("__init__", &from_constant<eig::Vector4d>)
         .def("__init__", &from_python_list<eig::Vector4d>)
@@ -482,6 +499,7 @@ void init_eigen(py::module &m){
         .def("__getitem__", &matrixx_row<eig::MatrixXd>)
         .def("col", &matrixx_col<eig::MatrixXd>)
         .def("row", &matrixx_row<eig::MatrixXd>)
+        .def("__len__",[](eig::MatrixXd &mat){return mat.rows();})
         .def("to_list", &matrixx_as_list)
         .def("__mul__", &mat_mul<eig::MatrixXd, eig::MatrixXd>)
         .def("__mul__", &mat_mul<eig::MatrixXd, eig::SparseMatrix<double>>);
