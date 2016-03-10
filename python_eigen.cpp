@@ -328,6 +328,7 @@ vector<vector<double>> matrixx_as_list(eig::MatrixXd &self){
     return out;
 }
 
+
 void init_eigen(py::module &m){
     py::class_<eig::Vector2d>(m, "vector2")
         .def(py::init<double, double>())

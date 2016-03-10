@@ -1,7 +1,7 @@
 import sys
 
 sys.path.insert(0, "build/")
-from eigen import vector2, vector3, vector4, vectorx, matrixx, matrix44, sparse_matrix, triplet
+from eigen import *
 
 import numpy as np
 import unittest
