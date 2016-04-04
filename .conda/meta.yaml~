@@ -1,0 +1,19 @@
+package:
+  name: paraeigen
+  version: 0.0.1
+
+build:
+  number: 0
+
+source:
+  path: ../
+
+requirements:
+  build:
+    - python
+    - pybind11
+  run:
+    - python
+
+about:
+  summary: potential flow with boundary elements.

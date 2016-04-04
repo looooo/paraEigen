@@ -328,6 +328,13 @@ vector<vector<double>> matrixx_as_list(eig::MatrixXd &self){
     return out;
 }
 
+template<typename t1, typename t2>
+eig::VectorXd py_and(t1 & self, t2 & other){
+    eig::VectorXd new_vec(self.rows() + other.rows());
+    new_vec << self, other;
+    return new_vec;
+}
+
 
 void init_eigen(py::module &m){
     py::class_<eig::Vector2d>(m, "vector2")
@@ -349,6 +356,10 @@ void init_eigen(py::module &m){
         .def("__len__",[](eig::Vector2d &v){return v.size();})
         .def("__abs__",[](eig::Vector2d &v){return v.norm();})
         .def("__add__", &add<eig::Vector2d>)
+        .def("__and__", &py_and<eig::Vector2d, eig::VectorXd>)
+        .def("__and__", &py_and<eig::Vector2d, eig::Vector2d>)
+        .def("__and__", &py_and<eig::Vector2d, eig::Vector3d>)
+        .def("__and__", &py_and<eig::Vector2d, eig::Vector4d>)
         .def("__radd__", &radd<eig::Vector2d>)
         .def("__sub__", &sub<eig::Vector2d>)
         .def("__neg__", &neg<eig::Vector2d>)
@@ -383,6 +394,10 @@ void init_eigen(py::module &m){
         .def("__len__",[](eig::Vector3d &v){return v.size();})
         .def("__abs__",[](eig::Vector3d &v){return v.norm();})
         .def("__add__", &add<eig::Vector3d>)
+        .def("__and__", &py_and<eig::Vector3d, eig::VectorXd>)
+        .def("__and__", &py_and<eig::Vector3d, eig::Vector2d>)
+        .def("__and__", &py_and<eig::Vector3d, eig::Vector3d>)
+        .def("__and__", &py_and<eig::Vector3d, eig::Vector4d>)
         .def("__radd__", &radd<eig::Vector3d>)
         .def("__sub__", &sub<eig::Vector3d>)
         .def("__neg__", &neg<eig::Vector3d>)
@@ -419,6 +434,10 @@ void init_eigen(py::module &m){
         .def("__len__",[](eig::Vector4d &v){return v.size();})
         .def("__abs__",[](eig::Vector4d &v){return v.norm();})
         .def("__add__", &add<eig::Vector4d>)
+        .def("__and__", &py_and<eig::Vector4d, eig::VectorXd>)
+        .def("__and__", &py_and<eig::Vector4d, eig::Vector2d>)
+        .def("__and__", &py_and<eig::Vector4d, eig::Vector3d>)
+        .def("__and__", &py_and<eig::Vector4d, eig::Vector4d>)
         .def("__radd__", &add<eig::Vector4d>)
         .def("__sub__", &sub<eig::Vector4d>)
         .def("__neg__", &neg<eig::Vector4d>)
@@ -445,6 +464,10 @@ void init_eigen(py::module &m){
         .def("__len__",[](eig::VectorXd &v){return v.size();})
         .def("__abs__",[](eig::VectorXd &v){return v.norm();})
         .def("__add__", &add<eig::VectorXd>)
+        .def("__and__", &py_and<eig::VectorXd, eig::VectorXd>)
+        .def("__and__", &py_and<eig::VectorXd, eig::Vector2d>)
+        .def("__and__", &py_and<eig::VectorXd, eig::Vector3d>)
+        .def("__and__", &py_and<eig::VectorXd, eig::Vector4d>)
         .def("__sub__", &sub<eig::VectorXd>)
         .def("__neg__", &neg<eig::VectorXd>)
         .def("__pos__", &pos<eig::VectorXd>)
@@ -516,8 +539,8 @@ void init_eigen(py::module &m){
         .def("__mul__", &mat_mul<eig::SparseMatrix<double>, eig::SparseMatrix<double>>)
         .def("to_matrixx",[](eig::SparseMatrix<double> &self){return eig::MatrixXd(self);});
 }
-PYBIND11_PLUGIN(eigen){
-    py::module m("eigen");
+PYBIND11_PLUGIN(para_eigen){
+    py::module m("para_eigen");
     init_eigen(m);
     return m.ptr();
 };
