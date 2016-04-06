@@ -10,9 +10,9 @@ source:
 
 requirements:
   build:
-    - python
+    - cmake
     - pybind11
-    # eigen
+    - eigen
   run:
     - python
 

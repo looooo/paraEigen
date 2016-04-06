@@ -2,7 +2,7 @@
 # using the eigen.sparse_matrix
 
 from __future__ import division
-import eigen
+import paraEigen as eigen
 import numpy as np
 
 

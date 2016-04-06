@@ -175,12 +175,13 @@ void vectorx_from_buffer(eig::VectorXd& instance, py::buffer b){
 std::string vectorx_repr(eig::VectorXd& self){
     std::ostringstream out_str;
     out_str << "VectorXd(";
-    int end = self.size()>(5*2)? 5:self.size()-1;
+    bool increment = (self.size()>(5*2));
+    int end = increment? 5:self.size()-1;
     for (int i=0; i< end; i++)
     {
         out_str << self[i] << ", ";
     }
-    if (end == 5){
+    if (increment){
         out_str << "....., ";
         for (int i=self.size() - end; i< self.size(); i++)
         {
@@ -336,7 +337,7 @@ eig::VectorXd py_and(t1 & self, t2 & other){
 }
 
 
-void init_eigen(py::module &m){
+void init_paraEigen(py::module &m){
     py::class_<eig::Vector2d>(m, "vector2")
         .def(py::init<double, double>())
         .def_property("x", [](eig::Vector2d &v){return v.x();},
@@ -369,6 +370,8 @@ void init_eigen(py::module &m){
         .def("__div__", &div<eig::Vector2d>)
         .def("__truediv__", &div<eig::Vector2d>)
         .def("norm",[](eig::Vector2d &v){return v.norm();})
+        .def_property_readonly("normal", [](eig::Vector2d &v){return eig::Vector2d(-v.y(), v.x());})
+        .def("normalize", [](eig::Vector2d &v){v.normalize(); return v;})
         .def("dot", &dot<eig::Vector2d>);
 
 
@@ -407,6 +410,7 @@ void init_eigen(py::module &m){
         .def("__div__", &div<eig::Vector3d>)
         .def("__truediv__", &div<eig::Vector3d>)
         .def("norm",[](eig::Vector3d &v){return v.norm();})
+        .def("normalize", [](eig::Vector3d &v){v.normalize(); return v;})
         .def("cross", &cross<eig::Vector3d>)
         .def("dot", &dot<eig::Vector3d>);
         
@@ -447,6 +451,7 @@ void init_eigen(py::module &m){
         .def("__div__", &div<eig::Vector4d>)
         .def("__truediv__", &div<eig::Vector4d>)
         .def("norm",[](eig::Vector4d &v){return v.norm();})
+        .def("normalize", [](eig::Vector4d &v){v.normalize(); return v;})
         .def("dot", &dot<eig::Vector4d>);
         
     py::class_<eig::VectorXd>(m, "vectorx")
@@ -476,6 +481,7 @@ void init_eigen(py::module &m){
         .def("__div__", &div<eig::VectorXd>)
         .def("__truediv__", &div<eig::VectorXd>)
         .def("norm",[](eig::VectorXd &v){return v.norm();})
+        .def("normalize", [](eig::VectorXd &v){v.normalize(); return v;})
         .def("dot", &dot<eig::VectorXd>);
         
     py::class_<Matrix44d>(m, "matrix44")
@@ -485,7 +491,7 @@ void init_eigen(py::module &m){
         .def("__getitem__", &matrixx_getitem<Matrix44d>)
         .def("col", &matrixx_col<Matrix44d>)
         .def("row", &matrixx_row<Matrix44d>)
-//         .def("to_list", &matrixx_as_list)
+//         .def("tolist", &matrixx_as_list)
 //         .def("__mul__", &mat_mul<eig::MatrixXd, eig::MatrixXd>)
 //         .def("__mul__", &mat_mul<eig::MatrixXd, eig::SparseMatrix<double>>)
         ;
@@ -497,7 +503,7 @@ void init_eigen(py::module &m){
         .def("__getitem__", &matrixx_getitem<Matrix33d>)
         .def("col", &matrixx_col<Matrix33d>)
         .def("row", &matrixx_row<Matrix33d>)
-//         .def("to_list", &matrixx_as_list)
+//         .def("tolist", &matrixx_as_list)
 //         .def("__mul__", &mat_mul<eig::MatrixXd, eig::MatrixXd>)
 //         .def("__mul__", &mat_mul<eig::MatrixXd, eig::SparseMatrix<double>>)
         ;
@@ -509,7 +515,7 @@ void init_eigen(py::module &m){
         .def("__getitem__", &matrixx_getitem<Matrix22d>)
         .def("col", &matrixx_col<Matrix22d>)
         .def("row", &matrixx_row<Matrix22d>)
-//         .def("to_list", &matrixx_as_list)
+//         .def("tolist", &matrixx_as_list)
 //         .def("__mul__", &mat_mul<eig::MatrixXd, eig::MatrixXd>)
 //         .def("__mul__", &mat_mul<eig::MatrixXd, eig::SparseMatrix<double>>)
         ;
@@ -524,9 +530,11 @@ void init_eigen(py::module &m){
         .def("col", &matrixx_col<eig::MatrixXd>)
         .def("row", &matrixx_row<eig::MatrixXd>)
         .def("__len__",[](eig::MatrixXd &mat){return mat.rows();})
-        .def("to_list", &matrixx_as_list)
+        .def("tolist", &matrixx_as_list)
         .def("__mul__", &mat_mul<eig::MatrixXd, eig::MatrixXd>)
-        .def("__mul__", &mat_mul<eig::MatrixXd, eig::SparseMatrix<double>>);
+        .def("__mul__", &mat_mul<eig::MatrixXd, eig::SparseMatrix<double>>)
+        .def("__mul__", [](eig::MatrixXd& mat, double c){return eig::MatrixXd(c * mat);})
+        .def_property_readonly("T", [](eig::MatrixXd& mat){return eig::MatrixXd(mat.transpose());});
         
     py::class_<eig::Triplet<double>>(m, "triplet")
         .def(py::init<int, int, double>())
@@ -537,10 +545,12 @@ void init_eigen(py::module &m){
         .def("set_from_triplets", &sparse_from_triplets)
         .def("__mul__", &mat_mul<eig::SparseMatrix<double>, eig::MatrixXd>)
         .def("__mul__", &mat_mul<eig::SparseMatrix<double>, eig::SparseMatrix<double>>)
+        .def_property_readonly("T", [](eig::SparseMatrix<double> mat)
+                                      {return eig::SparseMatrix<double>(mat.transpose());})
         .def("to_matrixx",[](eig::SparseMatrix<double> &self){return eig::MatrixXd(self);});
 }
-PYBIND11_PLUGIN(para_eigen){
-    py::module m("para_eigen");
-    init_eigen(m);
+PYBIND11_PLUGIN(paraEigen){
+    py::module m("paraEigen");
+    init_paraEigen(m);
     return m.ptr();
 };
