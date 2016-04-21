@@ -6,7 +6,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/operators.h>
 
-
+#include <memory>
 #include <vector>
 #include <tuple>
 #include <map>
@@ -338,7 +338,7 @@ eig::VectorXd py_and(t1 & self, t2 & other){
 
 
 void init_paraEigen(py::module &m){
-    py::class_<eig::Vector2d>(m, "vector2")
+    py::class_<eig::Vector2d, std::shared_ptr<eig::Vector2d>>(m, "vector2")
         .def(py::init<double, double>())
         .def_property("x", [](eig::Vector2d &v){return v.x();},
                            [](eig::Vector2d &v, double x){v.x() = x;})
@@ -375,7 +375,7 @@ void init_paraEigen(py::module &m){
         .def("dot", &dot<eig::Vector2d>);
 
 
-    py::class_<eig::Vector3d>(m, "vector3")
+    py::class_<eig::Vector3d, std::shared_ptr<eig::Vector3d>>(m, "vector3")
         .def(py::init<double, double, double>())        
         .def_property("x", [](eig::Vector3d &v){return v.x();},
                            [](eig::Vector3d &v, double x){v.x() = x;})
@@ -415,7 +415,7 @@ void init_paraEigen(py::module &m){
         .def("dot", &dot<eig::Vector3d>);
         
         
-    py::class_<eig::Vector4d>(m, "vector4")
+    py::class_<eig::Vector4d, std::shared_ptr<eig::Vector4d>>(m, "vector4")
         .def(py::init<double, double, double, double>())
         .def_property("x", [](eig::Vector4d &v){return v.x();},
                            [](eig::Vector4d &v, double x){v.x() = x;})
@@ -454,7 +454,7 @@ void init_paraEigen(py::module &m){
         .def("normalize", [](eig::Vector4d &v){v.normalize(); return v;})
         .def("dot", &dot<eig::Vector4d>);
         
-    py::class_<eig::VectorXd>(m, "vectorx")
+    py::class_<eig::VectorXd, std::shared_ptr<eig::VectorXd>>(m, "vectorx")
         .def(py::init<>())
         .def("__init__", &vectorx_from_constant, py::arg("x"), py::arg("value")=0)
         .def("__init__", &vectorx_from_python_list)
