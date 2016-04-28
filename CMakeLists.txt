@@ -9,9 +9,9 @@ SET(CMAKE_CXX_FLAGS_REALEASE "-O3")
 find_package(Eigen3)
 include_directories( ${EIGEN3_INCLUDE_DIR})
 
-set(Python_ADDITIONAL_VERSIONS ${py})
-find_package(PythonInterp ${py})
-find_package(PythonLibs ${py})
+set(Python_ADDITIONAL_VERSIONS)
+find_package(PythonInterp)
+find_package(PythonLibs)
 
 include_directories( ${PYTHON_INCLUDE_DIRS})
 
