@@ -17,6 +17,7 @@ include_directories( ${PYTHON_INCLUDE_DIRS})
 
 PYTHON_ADD_MODULE(paraEigen SHARED python_eigen.cpp)
 configure_file(test.py test.py COPYONLY)
+target_link_libraries(paraEigen ${PYTHON_LIBRARIES})
 
 EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} -c 
   "from distutils.sysconfig import get_python_lib; print(get_python_lib())"

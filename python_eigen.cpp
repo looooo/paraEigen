@@ -206,7 +206,7 @@ void matrix_from_buffer(matrix& self, py::buffer b){
     py::buffer_info info = b.request();
     if (info.ndim != 2)
         throw std::runtime_error("Incombatible buffer dimension");
-    if (info.shape[0] != self.rows() and info.shape[2] != self.cols())
+    if (info.shape[0] != self.rows() && info.shape[2] != self.cols())
         throw runtime_error("incompatible shapes");
     memcpy(self.data(), info.ptr, sizeof(double) * self.size());
 }
@@ -285,14 +285,14 @@ double matrixx_getitem(matrix &self, tuple<int, int> t){
 
 template<typename matrix>
 eig::VectorXd matrixx_col(matrix &self, int col_index){
-    if (col_index >= self.size() or col_index < 0)
+    if (col_index >= self.size() || col_index < 0)
         throw runtime_error("row not matrix");
     return self.col(col_index);
 }
 
 template<typename matrix>
 eig::VectorXd matrixx_row(matrix &self, int row_index){
-    if (row_index >= self.row(0).size() or row_index < 0)
+    if (row_index >= self.row(0).size() || row_index < 0)
         throw runtime_error("row not matrix");
     return self.row(row_index);
 }
