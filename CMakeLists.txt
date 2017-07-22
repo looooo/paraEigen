@@ -3,8 +3,6 @@ project(eigpy)
 
 ADD_DEFINITIONS(-std=c++11)
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-SET(CMAKE_BUILD_TYPE REALEASE)
-SET(CMAKE_CXX_FLAGS_REALEASE "-O3")
 
 find_package(Eigen3)
 include_directories( ${EIGEN3_INCLUDE_DIR})
