@@ -534,6 +534,9 @@ void init_paraEigen(py::module &m){
         .def("__mul__", &mat_mul<eig::MatrixXd, eig::MatrixXd>)
         .def("__mul__", &mat_mul<eig::MatrixXd, eig::SparseMatrix<double>>)
         .def("__mul__", [](eig::MatrixXd& mat, double c){return eig::MatrixXd(c * mat);})
+        .def("__matmul__", &mat_mul<eig::MatrixXd, eig::MatrixXd>)
+        .def("__matmul__", &mat_mul<eig::MatrixXd, eig::SparseMatrix<double>>)
+        .def("__matmul__", [](eig::MatrixXd& mat, double c){return eig::MatrixXd(c * mat);})
         .def_property_readonly("T", [](eig::MatrixXd& mat){return eig::MatrixXd(mat.transpose());});
         
     py::class_<eig::Triplet<double>>(m, "triplet")
@@ -545,12 +548,14 @@ void init_paraEigen(py::module &m){
         .def("set_from_triplets", &sparse_from_triplets)
         .def("__mul__", &mat_mul<eig::SparseMatrix<double>, eig::MatrixXd>)
         .def("__mul__", &mat_mul<eig::SparseMatrix<double>, eig::SparseMatrix<double>>)
+        .def("__matmul__", &mat_mul<eig::SparseMatrix<double>, eig::MatrixXd>)
+        .def("__matmul__", &mat_mul<eig::SparseMatrix<double>, eig::SparseMatrix<double>>)
         .def_property_readonly("T", [](eig::SparseMatrix<double> mat)
                                       {return eig::SparseMatrix<double>(mat.transpose());})
         .def("to_matrixx",[](eig::SparseMatrix<double> &self){return eig::MatrixXd(self);});
 }
-PYBIND11_PLUGIN(paraEigen){
-    py::module m("paraEigen");
+
+py::module m("paraEigen");
+PYBIND11_MODULE(paraEigen, m){
     init_paraEigen(m);
-    return m.ptr();
 };
