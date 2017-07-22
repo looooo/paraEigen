@@ -555,7 +555,8 @@ void init_paraEigen(py::module &m){
         .def("to_matrixx",[](eig::SparseMatrix<double> &self){return eig::MatrixXd(self);});
 }
 
-py::module m("paraEigen");
-PYBIND11_MODULE(paraEigen, m){
+PYBIND11_PLUGIN(paraEigen){
+    py::module m("paraEigen");
     init_paraEigen(m);
+    return m.ptr();
 };

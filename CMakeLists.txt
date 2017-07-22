@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 2.6)
 project(eigpy)
 
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
 ADD_DEFINITIONS(-std=c++11)
-SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 find_package(Eigen3)
 include_directories( ${EIGEN3_INCLUDE_DIR})
