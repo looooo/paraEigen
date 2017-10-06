@@ -39,14 +39,15 @@ void from_constant(Vector& instance, double constant = 0){
 
 
 template<typename Vector>
-void from_python_list(Vector& instance, vector<double> v){
-    if (v.size() != instance.size())
-        throw py::index_error("number of elements given, not match Vector size");
+void from_python_list(Vector& instance, vector<double> other){
     new (&instance) Vector();
-    int i = 0;
-    for (double vi: v){
-        instance[i] = vi;
-        i++;
+    instance.setZero();
+    int smaller = instance.size();
+    if (smaller > other.size()){
+        smaller = other.size();
+    }
+    for (int i=0; i<smaller; i++){
+        instance[i] = other[i];
     }
 }
 
@@ -151,12 +152,10 @@ Vector div(Vector &self, double value) {
     return self / value;
 }
 
-void vectorx_from_python_list(eig::VectorXd& instance, vector<double> v){
-    if (v.size() < 2)
-        throw runtime_error("vector size is too small");
-    new (&instance) eig::VectorXd(v.size());
+void vectorx_from_python_list(eig::VectorXd& instance, vector<double> other){
+    new (&instance) eig::VectorXd(other.size());
     int i = 0;
-    for (double vi: v){
+    for (double vi: other){
         instance[i] = vi;
         i++;
     }
@@ -347,10 +346,6 @@ void init_paraEigen(py::module &m){
         .def("__init__", &from_no_args<eig::Vector2d>)
         .def("__init__", &from_constant<eig::Vector2d>)
         .def("__init__", &from_python_list<eig::Vector2d>)
-        .def("__init__", &from_other<eig::Vector2d, eig::Vector2d>)
-        .def("__init__", &from_other<eig::Vector2d, eig::Vector3d>)
-        .def("__init__", &from_other<eig::Vector2d, eig::Vector4d>)
-        .def("__init__", &from_other<eig::Vector2d, eig::VectorXd>)
         .def("__init__", &vector_from_buffer<eig::Vector2d>)
         .def("__repr__", &vector_repr<eig::Vector2d>)
         .def("__getitem__", &vector_getitem<eig::Vector2d>)
@@ -386,10 +381,6 @@ void init_paraEigen(py::module &m){
         .def("__init__", &from_no_args<eig::Vector3d>)
         .def("__init__", &from_constant<eig::Vector3d>)
         .def("__init__", &from_python_list<eig::Vector3d>)
-        .def("__init__", &from_other<eig::Vector3d, eig::Vector2d>)
-        .def("__init__", &from_other<eig::Vector3d, eig::Vector3d>)
-        .def("__init__", &from_other<eig::Vector3d, eig::Vector4d>)
-        .def("__init__", &from_other<eig::Vector3d, eig::VectorXd>)
         .def("__init__", &vector_from_buffer<eig::Vector3d>)
         .def("__repr__", &vector_repr<eig::Vector3d>)
         .def("__getitem__", &vector_getitem<eig::Vector3d>)
@@ -428,10 +419,6 @@ void init_paraEigen(py::module &m){
         .def("__init__", &from_no_args<eig::Vector4d>)
         .def("__init__", &from_constant<eig::Vector4d>)
         .def("__init__", &from_python_list<eig::Vector4d>)
-        .def("__init__", &from_other<eig::Vector4d, eig::Vector2d>)
-        .def("__init__", &from_other<eig::Vector4d, eig::Vector3d>)
-        .def("__init__", &from_other<eig::Vector4d, eig::Vector4d>)
-        .def("__init__", &from_other<eig::Vector4d, eig::VectorXd>)
         .def("__init__", &vector_from_buffer<eig::Vector4d>)
         .def("__repr__", &vector_repr<eig::Vector4d>)
         .def("__getitem__", &vector_getitem<eig::Vector4d>)
@@ -458,10 +445,6 @@ void init_paraEigen(py::module &m){
         .def(py::init<>())
         .def("__init__", &vectorx_from_constant, py::arg("x"), py::arg("value")=0)
         .def("__init__", &vectorx_from_python_list)
-        .def("__init__", &from_other_x<eig::Vector2d>)
-        .def("__init__", &from_other_x<eig::Vector3d>)
-        .def("__init__", &from_other_x<eig::Vector4d>)
-        .def("__init__", &from_other_x<eig::VectorXd>)
         .def("__init__", &vectorx_from_buffer)
         .def("__repr__", &vectorx_repr)
         .def("__getitem__", &vector_getitem<eig::VectorXd>)
